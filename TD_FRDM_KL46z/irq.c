@@ -1,0 +1,127 @@
+#include"irq_addr.h"
+#include "irq.h"
+
+#define MAKE_DEFAULT_HANDLER(foo_IRQHandler)		\
+  void __attribute__((weak)) foo_IRQHandler(void) {	\
+    disable_irq();					\
+    while(1);						\
+  }
+
+// defined in ldscript
+extern  uint32_t _stack;
+// defined in crt0
+extern  void     _start();
+
+MAKE_DEFAULT_HANDLER( NMI_Handler);        
+MAKE_DEFAULT_HANDLER( HardFault_Handler);
+MAKE_DEFAULT_HANDLER( SVC_Handler);
+MAKE_DEFAULT_HANDLER( PendSV_Handler);     
+MAKE_DEFAULT_HANDLER( SysTick_Handler);    
+MAKE_DEFAULT_HANDLER( DMA0_IRQHandler);
+MAKE_DEFAULT_HANDLER( DMA1_IRQHandler);
+MAKE_DEFAULT_HANDLER( DMA2_IRQHandler);
+MAKE_DEFAULT_HANDLER( DMA3_IRQHandler);
+MAKE_DEFAULT_HANDLER( Dummy_IRQHandler);
+MAKE_DEFAULT_HANDLER( FTFA_IRQHandler); 
+MAKE_DEFAULT_HANDLER( PMC_IRQHandler);
+MAKE_DEFAULT_HANDLER( LLWU_IRQHandler);
+MAKE_DEFAULT_HANDLER( I2C0_IRQHandler);
+MAKE_DEFAULT_HANDLER( I2C1_IRQHandler);
+MAKE_DEFAULT_HANDLER( SPI0_IRQHandler); 
+MAKE_DEFAULT_HANDLER( SPI1_IRQHandler);
+MAKE_DEFAULT_HANDLER( UART0_IRQHandler); 
+MAKE_DEFAULT_HANDLER( UART1_IRQHandler); 
+MAKE_DEFAULT_HANDLER( UART2_IRQHandler);
+MAKE_DEFAULT_HANDLER( ADC0_IRQHandler);
+MAKE_DEFAULT_HANDLER( CMP0_IRQHandler); 
+MAKE_DEFAULT_HANDLER( TPM0_IRQHandler); 
+MAKE_DEFAULT_HANDLER( TPM1_IRQHandler); 
+MAKE_DEFAULT_HANDLER( TPM2_IRQHandler); 
+MAKE_DEFAULT_HANDLER( RTC_IRQHandler);
+MAKE_DEFAULT_HANDLER( RTC1_IRQHandler); 
+MAKE_DEFAULT_HANDLER( PIT_IRQHandler); 
+MAKE_DEFAULT_HANDLER( I2S0_IRQHandler); 
+MAKE_DEFAULT_HANDLER( USB_IRQHandler);
+MAKE_DEFAULT_HANDLER( DAC0_IRQHandler); 
+MAKE_DEFAULT_HANDLER( TSI0_IRQHandler); 
+MAKE_DEFAULT_HANDLER( MCG_IRQHandler);
+MAKE_DEFAULT_HANDLER( LPTMR0_IRQHandler); 
+MAKE_DEFAULT_HANDLER( SLCD_IRQHandler); 
+MAKE_DEFAULT_HANDLER( PORTA_IRQHandler);
+MAKE_DEFAULT_HANDLER( PORTCD_IRQHandler);
+
+
+void *vector_table[] = {
+  // Stack and Reset Handler
+  &_stack,            /* Top of stack */
+  _start,             /* Reset handler */
+
+  // ARM internal exceptions
+  NMI_Handler,        /* NMI handler */
+  HardFault_Handler,  /* Hard Fault handler */
+  0,                  /* Reserved */
+  0,                  /* Reserved */
+  0,                  /* Reserved */
+  0,                  /* Reserved */
+  0,                  /* Reserved */
+  0,                  /* Reserved */
+  0,                  /* Reserved */
+  SVC_Handler,        /* SVC handler */
+  0,                  /* Reserved */
+  0,                  /* Reserved */
+  PendSV_Handler,     /* Pending SVC handler */
+  SysTick_Handler,    /* SysTick hanlder */
+
+  // KL46 External interrupts
+  DMA0_IRQHandler,         /* DMA0 interrupt */
+  DMA1_IRQHandler,         /* DMA1 interrupt */
+  DMA2_IRQHandler,         /* DMA2 interrupt */
+  DMA3_IRQHandler,
+  Dummy_IRQHandler,
+  FTFA_IRQHandler, 
+  PMC_IRQHandler,
+  LLWU_IRQHandler,
+  I2C0_IRQHandler,
+  I2C1_IRQHandler, 
+  SPI0_IRQHandler, 
+  SPI1_IRQHandler,
+  UART0_IRQHandler, 
+  UART1_IRQHandler, 
+  UART2_IRQHandler,
+  ADC0_IRQHandler, 
+  CMP0_IRQHandler, 
+  TPM0_IRQHandler, 
+  TPM1_IRQHandler, 
+  TPM2_IRQHandler, 
+  RTC_IRQHandler, 
+  RTC_IRQHandler, 
+  PIT_IRQHandler, 
+  I2S0_IRQHandler, 
+  USB_IRQHandler, 
+  DAC0_IRQHandler, 
+  TSI0_IRQHandler, 
+  MCG_IRQHandler, 
+  LPTMR0_IRQHandler, 
+  SLCD_IRQHandler, 
+  PORTA_IRQHandler,
+  PORTCD_IRQHandler,
+};
+
+
+
+void irq_init(void) {
+  AIRCR |= 0x05FA0000;
+  AIRCR &= ~0xFA050000;  
+  VTOR = (uint32_t)vector_table;
+  enable_irq();
+}
+
+void irq_enable(int irq_number){
+  NVIC_ISER = 1 << irq_number; 
+}
+
+void irq_disable(int irq_number) {
+  NVIC_ICER = 1 << irq_number;
+}
+
+
